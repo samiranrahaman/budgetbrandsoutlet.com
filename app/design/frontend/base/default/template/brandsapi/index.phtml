@@ -1,0 +1,1149 @@
+<?php 
+if(isset($_GET['callapi']))
+	
+	{
+		
+					
+					 
+			  
+		    //$url='https://66:DSO25vC!93O^Hg@v1.api.brandsgateway.com/products';
+			//$url='https://66:DSO25vC!93O^Hg@v1.api.brandsgateway.com/products?category=15&per_page=10';
+			 //$url='https://2eac3486958d276e3a41dd6a6d50456a:4f7087ae3a73c2ebf2f76782ec9260c2@alldayfreeshipping.myshopify.com/admin/products.json';
+			$categoryurl=$_GET['category'];
+			$flag=0;
+		for($i=1;$i<=4;$i++)
+		{
+		  
+
+			 //$url='https://66:DSO25vC!93O^Hg@v1.api.brandsgateway.com/products?category='.$category.'&page='.$i;
+			  $url='https://66:DSO25vC!93O^Hg@v1.api.brandsgateway.com/products?category='.$categoryurl.'&per_page=100&page='.$i;
+			 $ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $url);
+			// Set so curl_exec returns the result instead of outputting it.
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+			// Get the response and close the channel.
+			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+			//echo curl_errno($ch);
+			 $response = curl_exec($ch);
+			$response_array=json_decode($response);
+			//echo"<pre>";print_r($response_array);
+			$c=0;
+			if(!empty($response_array)):
+			foreach($response_array as $drp_product)
+			{
+				
+				        if($drp_product->stock_quantity>0)
+						{
+							 $sku=$drp_product->sku;
+							  
+						Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+						$product = Mage::getModel('catalog/product');
+				        if(!$product->getIdBySku($sku))
+						{
+						$product
+						//    ->setStoreId(1) //you can set data in store scope
+							->setWebsiteIds(array(1)) //website ID the product is assigned to, as an array
+							->setAttributeSetId(4) //ID of a attribute set named 'default'
+							->setTypeId('simple') //product type
+							->setCreatedAt(strtotime('now')) //product creation time
+						//    ->setUpdatedAt(strtotime('now')) //product update time
+						 
+							->setSku($drp_product->sku) //SKU
+							->setName($drp_product->name) //product name
+							//->setWeight(4.0000)
+							->setStatus(1) //product status (1 - enabled, 2 - disabled)
+							->setTaxClassId(0) //tax class (0 - none, 1 - default, 2 - taxable, 4 - shipping)
+							->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH); //catalog and search visibility
+							if($drp_product->regular_price!='')
+							{
+								$holselprice=$drp_product->price;
+								$myprice=$holselprice*3;
+								$product->setPrice($drp_product->regular_price) //price in form 11.22
+							->setSpecialPrice($myprice)
+							->setPricePerItem($drp_product->regular_price);
+							}
+							else
+							{
+								$holselprice=$drp_product->price;
+								$myprice=$holselprice*3;
+								
+								$product->setPrice($myprice) //price in form 11.22
+							->setPricePerItem($myprice);
+							}
+							$product->setDescription($drp_product->description)
+							->setShortDescription($drp_product->short_description);
+						 
+						 
+						 $images=$drp_product->images;
+						 $imgarray='';
+						 $imgpath='';
+						 $values='';
+						  if(is_array($images))
+						{
+							foreach($images as $img)
+							{
+								//$image_url = 'https://brandsgateway.com/wp-content/uploads/2017/02/IMG_0535-Medium.jpg';
+							 $image_url=$img->src;
+							$content = file_get_contents($image_url);
+						//Store in the filesystem.
+						$imgpath="media/test/".time()."image.jpg";
+						$fp = fopen($imgpath,"w");
+						fwrite($fp, $content);
+						fclose($fp);
+						$product->addImageToMediaGallery($imgpath, array('image','thumbnail','small_image'), false, false) ;
+						
+						
+							}
+							
+						} 
+						  
+						   //->setMediaGallery (array('images'=>array (), 'values'=>array ())) //media gallery initialization
+							//->addImageToMediaGallery($img, array('image','thumbnail','small_image'), false, false) //assigning image, thumb and small image to media gallery
+									 
+							$product->setStockData(array(
+											   'use_config_manage_stock' => 0, //'Use config settings' checkbox
+											   'manage_stock'=>1, //manage stock
+											   'min_sale_qty'=>1, //Minimum Qty Allowed in Shopping Cart
+											   'max_sale_qty'=>2, //Maximum Qty Allowed in Shopping Cart
+											   'is_in_stock' => 1, //Stock Availability
+											   'qty' => $drp_product->stock_quantity //qty
+										   )
+							);
+						 
+							//->setCategoryIds(array(3, 10)); //assign product to categories
+						$categories=$drp_product->categories;
+					 $categoryarray='';
+					 if(is_array($categories))
+						{
+							foreach($categories as $category)
+							{
+								if($categoryurl==6){
+								if($category->name=='Dresses')
+								 {
+									 $categoryarray[]=247;
+									 $categoryarray[]=53;
+									 $categoryarray[]=258;
+								 }
+								 if($category->name=='Skirts')
+								 {
+									 $categoryarray[]=247;
+									 $categoryarray[]=53;
+									 $categoryarray[]=258;
+								 }
+								 if($category->name=='Jackets')
+								 {
+									 if($category->id==308)
+									 {
+									 $categoryarray[]=247;
+									 $categoryarray[]=53;
+									 $categoryarray[]=259;
+									 }
+									  if($category->id==4)
+									 {
+									 $categoryarray[]=247;
+									 $categoryarray[]=47;
+									 $categoryarray[]=73;
+									 }
+									 
+								 }
+								  //if($category->name=='Jackets &amp; Coats')
+								 if($category->id==28)
+								 {
+									$categoryarray[]=247;
+									 $categoryarray[]=53;
+									 $categoryarray[]=259;
+								 }
+								
+								if($category->name=='Sweaters')
+								 {
+									 if($category->id==26)//women
+									 {
+									 $categoryarray[]=247;
+									 $categoryarray[]=53;
+									 $categoryarray[]=259;
+									 }
+									  if($category->id==16)//men
+									 {
+									 $categoryarray[]=247;
+									 $categoryarray[]=47;
+									 $categoryarray[]=74;
+									 }
+									 
+								 }
+								 if($category->name=='Shirts')
+								 {
+									 if($category->id==416)//women
+									 {
+									 $categoryarray[]=247;
+									 $categoryarray[]=53;
+									 $categoryarray[]=260;
+									 }
+									  if($category->id==17)//men
+									 {
+									 $categoryarray[]=247;
+									 $categoryarray[]=47;
+									 $categoryarray[]=74;
+									 }
+									 
+								 }
+								  if($category->id==27)//women T-shirt
+								 {
+									
+									 $categoryarray[]=247;
+									 $categoryarray[]=53;
+									 $categoryarray[]=260;
+									 
+									 
+								 }
+								  if($category->id==15)//men T-shirt
+								 {
+									
+									$categoryarray[]=247;
+									 $categoryarray[]=47;
+									 $categoryarray[]=73;
+									 
+									 
+								 }
+								 if($category->id==14)//men Jeans
+								 {
+									
+									$categoryarray[]=247;
+									 $categoryarray[]=47;
+									 $categoryarray[]=265;
+									 
+									 
+								 }
+								 if($category->id==25)//women Jeans
+								 {
+									
+									$categoryarray[]=247;
+									 $categoryarray[]=53;
+									 $categoryarray[]=261;
+								 }
+								  if($category->id==9)//Men Suits
+								 {
+									
+									$categoryarray[]=247;
+									 $categoryarray[]=47;
+									 $categoryarray[]=266;
+								 }
+								  if($category->id==21)//women Suits &amp; Blazer
+								 {
+									
+									$categoryarray[]=247;
+									 $categoryarray[]=53;
+									 $categoryarray[]=259;
+								 }
+								 
+								 /* if($category->id==224)//new arrival
+								 {
+									 
+									$categoryarray[]=301;     
+									
+								 } */
+								 
+								}
+								//shoes//
+								if($categoryurl==29){
+								 if($category->id==46)//women boots
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=249;
+									 $categoryarray[]=281;
+								 }
+								 if($category->id==41)//women high heels
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=249;
+									 $categoryarray[]=282;
+								 }
+								 
+								 if($category->id==40)//women Wedges
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=249;
+									 $categoryarray[]=283;
+								 }
+								 if($category->id==43)//women Flats
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=249;
+									 $categoryarray[]=284;
+								 }
+								 
+								 if($category->id==43)//women Sandals
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=249;
+									 $categoryarray[]=286;
+								 }
+								  if($category->id==334)//women Sports shoes
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=249;
+									 $categoryarray[]=285;
+								 }
+								 
+								 
+								  if($category->id==38)//men boots
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=250;
+									 $categoryarray[]=287;
+								 }
+								if($category->id==252)//men Casual  
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=250;
+									 $categoryarray[]=288;
+								 }
+								 if($category->id==392)//men Slippers  
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=250;
+									 $categoryarray[]=290;
+								 }
+								 if($category->id==33)//men Sandals  
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=250;
+									 $categoryarray[]=290;
+								 } 
+								 /* if($category->id==224)//new arrival
+								 {
+									 
+									$categoryarray[]=301;  
+									
+								 } */
+								} 
+								//Accessories//
+								if($categoryurl==56)
+								{
+									if($category->id==393)//Handbags
+								 {
+									
+									$categoryarray[]=51;
+									$categoryarray[]=243;
+								 }
+								 if($category->id==51)//Purses
+								 {
+									
+									$categoryarray[]=51;
+									$categoryarray[]=245;
+								 }
+								 
+								 /*  if($category->id==394)//new arrival
+								 {
+									 
+									$categoryarray[]=301; 
+									
+								 } */
+								}
+								//Technology//
+								if($categoryurl==74)
+								{
+									if($category->id==76)//Phone Covers
+								 {
+									
+									$categoryarray[]=51;
+									$categoryarray[]=295;
+								 }
+								 if($category->id==75)//Tablet Covers
+								 {
+									
+									$categoryarray[]=51;
+									$categoryarray[]=295;
+								 }
+								 
+								}
+								
+							}
+						}
+							 
+						$xx='';
+						//echo "<pre>";print_r($categoryarray);
+						$categoryarray=array_unique($categoryarray);
+						foreach($categoryarray as $ct)
+						{
+							
+							$xx.=$ct.',';
+						}
+						 $xx=substr($xx, 0, -1); 
+						//$xx='247,53,258';
+						$pieces = explode(",",$xx);		
+					    $product->setCategoryIds($pieces);
+						
+						
+						if(!empty($categoryarray))
+						{
+							$product->save();
+							$flag=1;
+						}
+						
+						/* 
+						$product->setCategoryIds($pieces);
+						$product->save(); */
+						}
+						else
+						{
+						 $product_update = Mage::getModel('catalog/product')->loadByAttribute('sku',$sku);
+						 $product_update
+							->setName($drp_product->name)
+							->setStatus(1) //product status (1 - enabled, 2 - disabled)
+							->setTaxClassId(0);
+							if($drp_product->regular_price!='')
+							{
+								$holselprice=$drp_product->price;
+								$myprice2=$holselprice*3;
+								
+								$product_update->setPrice($drp_product->regular_price) //price in form 11.22
+							->setSpecialPrice($myprice2)
+							->setPricePerItem($drp_product->regular_price);
+							}
+							else
+							{
+								$holselprice=$drp_product->price;
+								$myprice2=$holselprice*3;
+								
+								$product_update->setPrice($myprice2) //price in form 11.22
+							->setPricePerItem($myprice2);
+							}
+							
+							
+							
+							$product_update->setDescription($drp_product->description)
+							->setShortDescription($drp_product->short_description);
+						 
+							
+							$stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product_update->getId());
+							$stockItem->setData('is_in_stock',1); //set updated data as your requirement
+							$stockItem->setData('qty',$drp_product->stock_quantity); //set updated quantity 
+							$stockItem->setData('manage_stock',1);
+							$stockItem->setData('use_config_notify_stock_qty',1);
+							$stockItem->save();
+
+							$product_update->save();
+						    $flag=1;
+						
+						
+						}
+						
+						}							
+						  
+						  
+						  
+						  
+						  
+						$variations=$drp_product->variations;
+						if(is_array($variations))
+						 {
+							 foreach($variations as $variations_product)
+							 { 
+							 
+							 //$sku=$drp_product->sku;
+							 $sku=$variations_product->sku.'-'.$variations_product->id;
+  
+						Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+						$product = Mage::getModel('catalog/product');
+				        if(!$product->getIdBySku($sku)):
+						 
+						try{
+							 
+							 Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+							$product2 = Mage::getModel('catalog/product');
+							 $product2
+						//    ->setStoreId(1) 
+							->setWebsiteIds(array(1)) 
+							->setAttributeSetId(4) 
+							->setTypeId('simple') 
+							->setCreatedAt(strtotime('now')); 
+						//    ->setUpdatedAt(strtotime('now')) 
+						   $sku=$variations_product->sku.'-'.$variations_product->id;
+						  //echo "<br>";
+							$product2->setSku($sku);
+							$attributes=$variations_product->attributes;
+							$p_name_var='';
+							 if(is_array($attributes))
+							 {
+								 foreach($attributes as $attributesdata)
+									{
+										$p_name_var.=$attributesdata->name.'('.$attributesdata->option.')';
+										
+									}
+							 }
+							// $p_name=$drp_product->name.'('.$variations_product->attributes['name'].')';
+							 $p_name=$drp_product->name.'-'.$p_name_var;
+							$product2->setName($p_name)
+							//->setWeight(4.0000)
+							->setStatus(1) 
+							->setTaxClassId(0) 
+							->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH);
+							
+							
+							if($variations_product->regular_price!='')
+							{
+								
+								$holselprice=$variations_product->price;
+								$myprice=$holselprice*3;
+								
+								$product2->setPrice($variations_product->regular_price) //price in form 11.22
+							->setSpecialPrice($myprice)
+							//->setCost($variations_product->regular_price)
+							->setPricePerItem($variations_product->regular_price);
+							}
+							else
+							{
+								$holselprice=$variations_product->price;
+								$myprice=$holselprice*3;
+							$product2->setPrice($myprice)
+							->setPricePerItem($myprice);
+							}
+							
+							
+							
+							
+							
+						     $product2->setDescription($drp_product->description)
+							->setShortDescription($drp_product->short_description);
+						 
+						 
+						 $images=$drp_product->images;
+						 $imgarray='';
+						 $imgpath='';
+						 $values='';
+						  if(is_array($images))
+						{
+							/* $image=$variations_product->image;
+							if(is_array($image))
+									{
+
+										array_push($images,$image);
+									} */ 
+							
+							
+							//echo "<pre>";print_r($images);
+							foreach($images as $img)
+							{
+								//$image_url = 'https://brandsgateway.com/wp-content/uploads/2017/02/IMG_0535-Medium.jpg';
+							  $image_url=$img->src;
+							 
+							$content = file_get_contents($image_url);
+						//Store in the filesystem.
+						$imgpath="media/test/".time()."image.jpg"; 
+						$fp = fopen($imgpath,"w");
+						fwrite($fp, $content);
+						fclose($fp);
+						$product2->addImageToMediaGallery($imgpath, array('image','thumbnail','small_image'), false, false) ;
+						
+						
+							}
+							
+						}
+						 
+						 
+						 
+						$image=$variations_product->image;
+						 $imgarray='';
+						 $imgpath2='';
+						 $values='';
+						  if(is_array($image))
+						{
+							foreach($image as $img2)
+							{
+								//$image_url = 'https://brandsgateway.com/wp-content/uploads/2017/02/IMG_0535-Medium.jpg';
+							 $image_url2=$img2->src;
+							$content = file_get_contents($image_url2);
+						//Store in the filesystem.
+						$imgpath2="media/test/".time()."image.jpg";
+						$fp = fopen($imgpath2,"w");
+						fwrite($fp, $content);
+						fclose($fp);
+						$product2->addImageToMediaGallery($imgpath2, array('image','thumbnail','small_image'), false, false) ;
+						
+						
+							}
+							
+						}  
+						  
+						   //->setMediaGallery (array('images'=>array (), 'values'=>array ())) //media gallery initialization
+							//->addImageToMediaGallery($img, array('image','thumbnail','small_image'), false, false) //assigning image, thumb and small image to media gallery
+									 
+							$product2->setStockData(array(
+											   'use_config_manage_stock' => 0, //'Use config settings' checkbox
+											   'manage_stock'=>1, //manage stock
+											   'min_sale_qty'=>1, //Minimum Qty Allowed in Shopping Cart
+											   'max_sale_qty'=>2, //Maximum Qty Allowed in Shopping Cart
+											   'is_in_stock' => 1, //Stock Availability
+											   'qty' => $variations_product->stock_quantity //qty
+										   )
+							);
+						 
+							//->setCategoryIds(array(3, 10)); //assign product to categories
+							
+					   
+						//$categoryarray=sort($categoryarray);
+					 //echo "<pre>";print_r($categoryarray);
+						 $categories=$drp_product->categories;
+					 $categoryarray='';
+					 if(is_array($categories))
+						{
+							foreach($categories as $category)
+							{
+								if($categoryurl==6){
+								if($category->name=='Dresses')
+								 {
+									 $categoryarray[]=247;
+									 $categoryarray[]=53;
+									 $categoryarray[]=258;
+								 }
+								 if($category->name=='Skirts')
+								 {
+									 $categoryarray[]=247;
+									 $categoryarray[]=53;
+									 $categoryarray[]=258;
+								 }
+								 if($category->name=='Jackets')
+								 {
+									 if($category->id==308)
+									 {
+									 $categoryarray[]=247;
+									 $categoryarray[]=53;
+									 $categoryarray[]=259;
+									 }
+									  if($category->id==4)
+									 {
+									 $categoryarray[]=247;
+									 $categoryarray[]=47;
+									 $categoryarray[]=73;
+									 }
+									 
+								 }
+								  //if($category->name=='Jackets &amp; Coats')
+								 if($category->id==28)
+								 {
+									$categoryarray[]=247;
+									 $categoryarray[]=53;
+									 $categoryarray[]=259;
+								 }
+								
+								if($category->name=='Sweaters')
+								 {
+									 if($category->id==26)//women
+									 {
+									 $categoryarray[]=247;
+									 $categoryarray[]=53;
+									 $categoryarray[]=259;
+									 }
+									  if($category->id==16)//men
+									 {
+									 $categoryarray[]=247;
+									 $categoryarray[]=47;
+									 $categoryarray[]=74;
+									 }
+									 
+								 }
+								 if($category->name=='Shirts')
+								 {
+									 if($category->id==416)//women
+									 {
+									 $categoryarray[]=247;
+									 $categoryarray[]=53;
+									 $categoryarray[]=260;
+									 }
+									  if($category->id==17)//men
+									 {
+									 $categoryarray[]=247;
+									 $categoryarray[]=47;
+									 $categoryarray[]=74;
+									 }
+									 
+								 }
+								  if($category->id==27)//women T-shirt
+								 {
+									
+									 $categoryarray[]=247;
+									 $categoryarray[]=53;
+									 $categoryarray[]=260;
+									 
+									 
+								 }
+								  if($category->id==15)//men T-shirt
+								 {
+									
+									$categoryarray[]=247;
+									 $categoryarray[]=47;
+									 $categoryarray[]=73;
+									 
+									 
+								 }
+								 if($category->id==14)//men Jeans
+								 {
+									
+									$categoryarray[]=247;
+									 $categoryarray[]=47;
+									 $categoryarray[]=265;
+									 
+									 
+								 }
+								 if($category->id==25)//women Jeans
+								 {
+									
+									$categoryarray[]=247;
+									 $categoryarray[]=53;
+									 $categoryarray[]=261;
+								 }
+								  if($category->id==9)//Men Suits
+								 {
+									
+									$categoryarray[]=247;
+									 $categoryarray[]=47;
+									 $categoryarray[]=266;
+								 }
+								  if($category->id==21)//women Suits &amp; Blazer
+								 {
+									
+									$categoryarray[]=247;
+									 $categoryarray[]=53;
+									 $categoryarray[]=259;
+								 }
+								 
+								 /* if($category->id==224)//new arrival
+								 {
+									 
+									$categoryarray[]=301;     
+									
+								 } */
+								 
+								}
+								//shoes//
+								if($categoryurl==29){
+								 if($category->id==46)//women boots
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=249;
+									 $categoryarray[]=281;
+								 }
+								 if($category->id==41)//women high heels
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=249;
+									 $categoryarray[]=282;
+								 }
+								 
+								 if($category->id==40)//women Wedges
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=249;
+									 $categoryarray[]=283;
+								 }
+								 if($category->id==43)//women Flats
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=249;
+									 $categoryarray[]=284;
+								 }
+								 
+								 if($category->id==43)//women Sandals
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=249;
+									 $categoryarray[]=286;
+								 }
+								  if($category->id==334)//women Sports shoes
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=249;
+									 $categoryarray[]=285;
+								 }
+								 
+								 
+								  if($category->id==38)//men boots
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=250;
+									 $categoryarray[]=287;
+								 }
+								if($category->id==252)//men Casual  
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=250;
+									 $categoryarray[]=288;
+								 }
+								 if($category->id==392)//men Slippers  
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=250;
+									 $categoryarray[]=290;
+								 }
+								 if($category->id==33)//men Sandals  
+								 {
+									
+									$categoryarray[]=248;
+									 $categoryarray[]=250;
+									 $categoryarray[]=290;
+								 } 
+								 /* if($category->id==224)//new arrival
+								 {
+									 
+									$categoryarray[]=301;  
+									
+								 } */
+								} 
+								//Accessories//
+								if($categoryurl==56)
+								{
+									if($category->id==393)//Handbags
+								 {
+									
+									$categoryarray[]=51;
+									$categoryarray[]=243;
+								 }
+								 if($category->id==51)//Purses
+								 {
+									
+									$categoryarray[]=51;
+									$categoryarray[]=245;
+								 }
+								 
+								 /*  if($category->id==394)//new arrival
+								 {
+									 
+									$categoryarray[]=301; 
+									
+								 } */
+								}
+								//Technology//
+								if($categoryurl==74)
+								{
+									if($category->id==76)//Phone Covers
+								 {
+									
+									$categoryarray[]=51;
+									$categoryarray[]=295;
+								 }
+								 if($category->id==75)//Tablet Covers
+								 {
+									
+									$categoryarray[]=51;
+									$categoryarray[]=295;
+								 }
+								 
+								}
+								
+							}
+						}
+							 
+						$xx='';
+						$categoryarray=array_unique($categoryarray);
+						foreach($categoryarray as $ct)
+						{
+							
+							$xx.=$ct.',';
+						}
+						 $xx=substr($xx, 0, -1); 
+						//$xx='247,53,258';
+						$pieces = explode(",",$xx);	
+						$product2->setCategoryIds($pieces);
+						
+						
+						if(!empty($categoryarray))
+						{
+							$product2->save();
+							$flag=1;
+						}
+						
+						
+							 
+
+							 
+						// } 
+							 
+							
+						
+						//echo "Product Add Successfull";
+						$c++;
+						
+						//endif; 
+							 
+						 }
+						catch(Exception $e){
+						//Mage::log($e->getMessage());
+						echo $e->getMessage();
+						
+						}
+						
+						else:
+					      // $product_update = Mage::getModel('catalog/product')->loadByAttribute('sku',$sku);
+						
+							/* $product_update->setName('samiran');
+							$product_update->setPrice(10);
+							$product_update->save();
+					       echo "successfull"; */
+						   
+						   try{
+
+						
+						$variations=$drp_product->variations;
+						if(is_array($variations))
+						 {
+							 foreach($variations as $variations_product)
+							 { 
+							// Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+						//$product2 = Mage::getModel('catalog/product');
+						//$sku2=$variations_product->sku.$variations_product->id;
+						$sku2=$variations_product->sku.'-'.$variations_product->id;
+						$product_update2 = Mage::getModel('catalog/product')->loadByAttribute('sku',$sku2);
+						
+						
+						
+							// $product_update2
+						//    ->setStoreId(1) 
+							//->setWebsiteIds(array(1)) 
+							//->setAttributeSetId(4) 
+							//->setTypeId('simple') 
+							//->setCreatedAt(strtotime('now')); 
+						//    ->setUpdatedAt(strtotime('now')) 
+						   //$sku=$variations_product->sku.$variations_product->id;
+						  //echo "<br>";
+							//$product2->setSku($sku);
+							$attributes=$variations_product->attributes;
+							$p_name_var='';
+							 if(is_array($attributes))
+							 {
+								 foreach($attributes as $attributesdata)
+									{
+										$p_name_var.=$attributesdata->name.'('.$attributesdata->option.')';
+										
+									}
+							 }
+							// $p_name=$drp_product->name.'('.$variations_product->attributes['name'].')';
+							 $p_name=$drp_product->name.'-'.$p_name_var;
+							$product_update2->setName($p_name)
+							//->setWeight(4.0000)
+							->setStatus(1) 
+							->setTaxClassId(0) 
+							->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH);
+							
+							
+							if($variations_product->regular_price!='')
+							{
+								$holselprice=$variations_product->price;
+								$myprice3=$holselprice*3;
+								
+								
+								$product_update2->setPrice($variations_product->regular_price) //price in form 11.22
+							->setSpecialPrice($myprice3)
+							//->setCost($variations_product->regular_price)
+							->setPricePerItem($variations_product->regular_price);
+							}
+							else
+							{
+								$holselprice=$variations_product->price;
+								$myprice3=$holselprice*3;
+								
+							$product_update2->setPrice($myprice3)
+							->setPricePerItem($myprice3);
+							}
+							
+							
+							
+							
+							
+						     $product_update2->setDescription($drp_product->description)
+							->setShortDescription($drp_product->short_description);
+						 
+						 
+						 /* $image=$variations_product->image;
+						 $imgarray='';
+						 $imgpath='';
+						 $values='';
+						  if(is_array($image))
+						{
+							foreach($image as $img)
+							{
+								//$image_url = 'https://brandsgateway.com/wp-content/uploads/2017/02/IMG_0535-Medium.jpg';
+							 $image_url=$img->src;
+							$content = file_get_contents($image_url);
+						//Store in the filesystem.
+						$imgpath="media/test/".time()."image.jpg";
+						$fp = fopen($imgpath,"w");
+						fwrite($fp, $content);
+						fclose($fp);
+						$product2->addImageToMediaGallery($imgpath, array('image','thumbnail','small_image'), false, false) ;
+						
+						
+							}
+							 
+						} */
+						  
+						   //->setMediaGallery (array('images'=>array (), 'values'=>array ())) //media gallery initialization
+							//->addImageToMediaGallery($img, array('image','thumbnail','small_image'), false, false) //assigning image, thumb and small image to media gallery
+									 
+							/* $product_update2->setStockData(array(
+											   'use_config_manage_stock' => 0, //'Use config settings' checkbox
+											   'manage_stock'=>1, //manage stock
+											   'min_sale_qty'=>1, //Minimum Qty Allowed in Shopping Cart
+											   'max_sale_qty'=>2, //Maximum Qty Allowed in Shopping Cart
+											   'is_in_stock' => 1, //Stock Availability
+											   'qty' => $variations_product->stock_quantity //qty
+										   )
+							); */
+							$stockItem2 = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product_update2->getId());
+							$stockItem2->setData('is_in_stock',1); //set updated data as your requirement
+							$stockItem2->setData('qty',$variations_product->stock_quantity); //set updated quantity 
+							$stockItem2->setData('manage_stock',1);
+							$stockItem2->setData('use_config_notify_stock_qty',1);
+							$stockItem2->save();
+						 
+							//->setCategoryIds(array(3, 10)); //assign product to categories
+							
+					 /* $categories=$drp_product->categories;
+					 $categoryarray='';
+					 if(is_array($categories))
+						{
+							foreach($categories as $category)
+							{
+								 if($category->name=='Clothing')
+								 {
+									 $categoryarray[]=247;
+								 }
+								 if($category->name=='Women')
+								 {
+									 $categoryarray[]=53;
+								 }
+								  if($category->name=='Tops &amp; T-Shirts')
+								 {
+									 $categoryarray[]=258;
+								 } 
+								
+							}
+						}  
+						//$categoryarray=sort($categoryarray);
+					   //print_r($categoryarray);
+						 $xx='';
+						$categoryarray=array_unique($categoryarray);
+						foreach($categoryarray as $ct)
+						{
+							
+							$xx.=$ct.',';
+						}
+						 $xx=substr($xx, 0, -1); 
+						//$xx='247,53,258';
+						$pieces = explode(",",$xx);
+						$product_update2->setCategoryIds($pieces); */
+						$product_update2->save();
+						$flag=1;	 
+							 
+						 } 
+						 }	 
+						
+						//echo "Product Update Successfull";
+						$c++;
+						
+						//endif;
+						
+						}
+						catch(Exception $e){
+						//Mage::log($e->getMessage());
+						echo $e->getMessage();
+						}
+						   
+						   
+					endif;
+						
+						
+						
+						 }
+						}
+						
+					//endif;
+				
+			}
+			endif;
+			
+			
+			curl_close($ch);
+			//exit; 
+		
+		}
+		
+		
+	}
+ $actual_link = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];
+?>
+<div  id="submit-form" style="background-color: aliceblue;padding: 17px 7px 10px 78px;">
+<form name="" method="get" action="http://budgetbrandsoutlet.com/brandsapi/<?php //echo $actual_link;?>"/>
+<input type="hidden" name="category" value="6"/><!--clothes-->
+
+<button type="submit" name="callapi" value="true" style="width: 100%;/* color: blue; */background-color: lightblue;     font-size: 28px;color: black;cursor: pointer;">Clothes Product Auto Featch Call</button>
+</form>
+</div>
+<div  id="submit-form" style="background-color: aliceblue;padding: 17px 7px 10px 78px;">
+<form name="" method="get" action="http://budgetbrandsoutlet.com/brandsapi/<?php //echo $actual_link;?>"/>
+<input type="hidden" name="category" value="29"/><!--Shoes-->
+<button type="submit" name="callapi" value="true" style="width: 100%;/* color: blue; */background-color: lightblue;     font-size: 28px;color: black;cursor: pointer;">Shoes Product Auto Featch Call</button>
+</form>
+</div>
+<div  id="submit-form" style="background-color: aliceblue;padding: 17px 7px 10px 78px;">
+<form name="" method="get" action="http://budgetbrandsoutlet.com/brandsapi/<?php //echo $actual_link;?>"/>
+<input type="hidden" name="category" value="56"/><!--Shoes-->
+<button type="submit" name="callapi" value="true" style="width: 100%;/* color: blue; */background-color: lightblue;     font-size: 28px;color: black;cursor: pointer;">
+Accessories(Handbags) Product Auto Featch Call</button>
+</form>
+</div>
+<div  id="submit-form" style="background-color: aliceblue;padding: 17px 7px 10px 78px;">
+<form name="" method="get" action="http://budgetbrandsoutlet.com/brandsapi/<?php //echo $actual_link;?>"/>
+<input type="hidden" name="category" value="74"/><!--Shoes-->
+<button type="submit" name="callapi" value="true" style="width: 100%;/* color: blue; */background-color: lightblue;     font-size: 28px;color: black;cursor: pointer;">
+Accessories(Mobile Devices) Product Auto Featch Call</button>
+</form>
+</div>
+
+<div style="background-color: aliceblue;">
+<?php
+if($flag)
+		{
+			echo '<h4 style="margin-left: 36%;">Product Setup successful</h4>';
+		}
+		/* else
+		{
+			echo "<h4>No New Product found</h4>";
+		} */
+?>
+</div>
+<script>
+$('#submit-form').click(function(e) {
+    e.preventDefault();
+	alert();
+    /* $.ajax({
+        url: "/mysite/customajax/ajax/index",
+        type: "POST",
+        success: function(data) {
+            if(data.success) {
+                $('#results').html(data.message);
+            }
+        }
+    }); */
+});
+</script>

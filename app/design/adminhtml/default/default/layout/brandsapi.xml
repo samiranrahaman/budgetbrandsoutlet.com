@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+  <brandsapi_adminhtml_brandsapibackend_index>
+	<reference name="content">
+	  <block type="brandsapi/adminhtml_brandsapibackend" name="brandsapibackend" template="brandsapi/brandsapibackend.phtml"/>
+	</reference>
+  </brandsapi_adminhtml_brandsapibackend_index>
+</layout>
